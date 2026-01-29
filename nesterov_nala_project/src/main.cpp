@@ -1,5 +1,5 @@
-#include "include/nala.hpp"
-#include "include/quadratic.hpp"
+#include "nala.hpp"
+#include "quadratic.hpp"
 #include <iostream>
 #include <cmath>
 

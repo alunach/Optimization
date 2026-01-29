@@ -1,4 +1,4 @@
-#include "include/nala.hpp"
+#include "nala.hpp"
 
 #include <cmath>
 #include <chrono>

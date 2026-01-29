@@ -1,4 +1,4 @@
-#include "include/quadratic.hpp"
+#include "quadratic.hpp"
 #include <stdexcept>
 
 QuadraticFunction::QuadraticFunction(int n,
