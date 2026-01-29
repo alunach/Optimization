@@ -106,10 +106,10 @@ add_executable(nesterov_project
 
 target_link_libraries(nesterov_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
-add_executable(nesterov_nala_project 
-    nesterov_project/src/main.cpp 
-    nesterov_project/src/nala.cpp 
-    nesterov_project/src/quadratic.cpp
+add_executable(nesterov_nala_project
+    nesterov_nala_project/src/main.cpp
+    nesterov_nala_project/src/nala.cpp
+    nesterov_nala_project/src/quadratic.cpp
 )
 
 target_link_libraries(nesterov_nala_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})

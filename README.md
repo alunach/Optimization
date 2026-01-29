@@ -112,13 +112,13 @@ docker images
 ### Windows (PowerShell)
 
 ```powershell
-docker run -it --name optimization-container -v ${PWD}:/workspace optimization-env
+docker run --rm -it --name optimization -v ${PWD} optimization-env
 ```
 
 ### Linux / macOS
 
 ```bash
-docker run -it --name optimization-container -v $(pwd):/workspace optimization-env
+docker run --rm -it --name optimization -v ${PWD} optimization-env
 ```
 
 Esto crea:
@@ -133,7 +133,9 @@ Esto crea:
 Dentro del contenedor:
 
 ```bash
-git clone https://github.com/alunach/Optimization.git
+git config --global http.sslVerify false
+git clone https://github.com/alunach/Optimization.git/
+
 cd Optimization
 ```
 
