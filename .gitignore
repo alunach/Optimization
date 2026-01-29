@@ -1,41 +1,66 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+# Ignorar archivos de compilación y binarios
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
 *.out
-*.app
+*.a
+*.so
+*.exe
 
-# debug information files
-*.dwo
+# Ignorar archivos de compilación generados por CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+build/
+install_manifest.txt
+
+# Ignorar directorios de compilación específicos de cada subproyecto
+adam_project/src/*.o
+adam_project/src/*.out
+autodiff_project/src/*.o
+autodiff_project/src/*.out
+gradient_project/src/*.o
+gradient_project/src/*.out
+knn_project/src/*.o
+knn_project/src/*.out
+minibatch_sgd_project/src/*.o
+minibatch_sgd_project/src/*.out
+nesterov_project/src/*.o
+nesterov_project/src/*.out
+pca_project/src/*.o
+pca_project/src/*.out
+sgd_project/src/*.o
+sgd_project/src/*.out
+svd_project/src/*.o
+svd_project/src/*.out
+
+# Ignorar imágenes y datos temporales
+#img/*.pgm
+#img/*.jpeg
+#data/*.csv
+
+# Ignorar archivos comprimidos
+*.zip
+*.tar.gz
+*.tar.bz2
+
+# Ignorar configuraciones del sistema y editor
+.vscode/
+*.swp
+*.swo
+*.bak
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos de control de versiones propios de ciertos editores
+*.idea/
+*.iml
+
+# Ignorar archivos de debugging o profiling
+*.log
+*.cache
+*.pdb
+*.dSYM/
+
+# Ignorar archivos de bibliotecas y dependencias externas
+external/
+third_party/
