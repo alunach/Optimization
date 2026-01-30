@@ -14,7 +14,7 @@ static void matvec(int n, const std::vector<double>& A, const std::vector<double
 }
 
 int main() {
-    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
+    auto ab = build_quadratic_from_csv("../../data/wine.csv", 1e-3, true, 1, 1);
     int n = ab.n;
 
     QuadraticFunction f(n, ab.A, ab.b);
