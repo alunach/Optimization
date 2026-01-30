@@ -1,68 +1,117 @@
 #include "Adam.h"
 
-// Constructor: inicializa valores
-Adam::Adam(const std::vector<std::vector<double>>& A, 
-           const std::vector<double>& b, double alpha, 
-           double beta1, double beta2, double epsilon, 
-           int max_iters, double tolerance)
-    : A(A), b(b), alpha(alpha), beta1(beta1), beta2(beta2), 
-      epsilon(epsilon), max_iters(max_iters), tolerance(tolerance) {
-    x.assign(b.size(), 0.0); // Inicializar x en 0
+#include <cblas.h>
+#include <chrono>
+#include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <stdexcept>
+
+Adam::Adam(int n,
+           std::vector<double> A_row_major,
+           std::vector<double> b,
+           double alpha,
+           double beta1,
+           double beta2,
+           double eps,
+           int max_iters,
+           double tol_grad)
+    : n_(n),
+      A_(std::move(A_row_major)),
+      b_(std::move(b)),
+      alpha_(alpha),
+      beta1_(beta1),
+      beta2_(beta2),
+      eps_(eps),
+      max_iters_(max_iters),
+      tol_grad_(tol_grad) {
+    if (n_ <= 0) throw std::runtime_error("n invalido");
+    if ((int)A_.size() != n_ * n_) throw std::runtime_error("A size != n*n");
+    if ((int)b_.size() != n_) throw std::runtime_error("b size != n");
 }
 
-// Método de optimización con Adam
-void Adam::optimize() {
-    int n = A.size();
-    std::vector<double> gradient(n, 0.0);
-    std::vector<double> m(n, 0.0);
-    std::vector<double> v(n, 0.0);
-    std::vector<double> Ax(n, 0.0);
+double Adam::f_value(const std::vector<double>& x,
+                     const std::vector<double>& Ax) const {
+    // f(x) = 0.5 x^T(Ax) - b^T x
+    const double xtAx = cblas_ddot(n_, x.data(), 1, Ax.data(), 1);
+    const double btx  = cblas_ddot(n_, b_.data(), 1, x.data(), 1);
+    return 0.5 * xtAx - btx;
+}
 
-    auto start_time = std::chrono::high_resolution_clock::now(); // Iniciar medición de tiempo
+Adam::Result Adam::optimize_to_csv(const std::string& csv_path,
+                                   const std::vector<double>& x0) {
+    std::ofstream csv(csv_path);
+    if (!csv.is_open()) throw std::runtime_error("No se pudo abrir CSV: " + csv_path);
+    csv << "iter,f,grad_norm,time_ms\n";
 
-    for (int iter = 1; iter <= max_iters; iter++) {
-        // Calcular Ax usando BLAS: Ax = A * x
-        cblas_dgemv(CblasRowMajor, CblasNoTrans, n, n, 1.0, &A[0][0], n, &x[0], 1, 0.0, &Ax[0], 1);
+    std::vector<double> x(n_, 0.0);
+    if (!x0.empty()) {
+        if ((int)x0.size() != n_) throw std::runtime_error("x0 size != n");
+        x = x0;
+    }
 
-        // Calcular el gradiente: grad = A * x - b
-        for (int i = 0; i < n; i++)
-            gradient[i] = Ax[i] - b[i];
+    std::vector<double> Ax(n_, 0.0);
+    std::vector<double> g(n_, 0.0);
 
-        // Calcular momentos Adam
-        for (int i = 0; i < n; i++) {
-            m[i] = beta1 * m[i] + (1 - beta1) * gradient[i];
-            v[i] = beta2 * v[i] + (1 - beta2) * (gradient[i] * gradient[i]);
-        }
+    std::vector<double> m(n_, 0.0);
+    std::vector<double> v(n_, 0.0);
 
-        // Corregir sesgo
-        std::vector<double> m_hat(n, 0.0);
-        std::vector<double> v_hat(n, 0.0);
-        for (int i = 0; i < n; i++) {
-            m_hat[i] = m[i] / (1 - std::pow(beta1, iter));
-            v_hat[i] = v[i] / (1 - std::pow(beta2, iter));
-        }
+    double b1t = 1.0; // beta1^t
+    double b2t = 1.0; // beta2^t
 
-        // Actualizar x: x = x - alpha * m_hat / (sqrt(v_hat) + epsilon)
-        for (int i = 0; i < n; i++) {
-            x[i] -= alpha * m_hat[i] / (std::sqrt(v_hat[i]) + epsilon);
-        }
+    auto t0 = std::chrono::high_resolution_clock::now();
 
-        // Calcular la norma del gradiente para verificar convergencia
-        double grad_norm = cblas_dnrm2(n, &gradient[0], 1);
-        if (grad_norm < tolerance) {
-            std::cout << "Convergencia alcanzada en iteración " << iter << std::endl;
+    Result res;
+
+    for (int iter = 1; iter <= max_iters_; ++iter) {
+        // Ax = A*x
+        cblas_dgemv(CblasRowMajor, CblasNoTrans, n_, n_,
+                    1.0, A_.data(), n_,
+                    x.data(), 1,
+                    0.0, Ax.data(), 1);
+
+        // g = Ax - b
+        for (int i = 0; i < n_; ++i) g[i] = Ax[i] - b_[i];
+
+        const double grad_norm = cblas_dnrm2(n_, g.data(), 1);
+        const double f = f_value(x, Ax);
+
+        auto now = std::chrono::high_resolution_clock::now();
+        const double ms = std::chrono::duration<double, std::milli>(now - t0).count();
+
+        csv << iter << "," << std::setprecision(15) << f << "," << grad_norm << "," << ms << "\n";
+
+        if (grad_norm < tol_grad_) {
+            res.iters = iter;
+            res.final_f = f;
+            res.final_grad_norm = grad_norm;
             break;
+        }
+
+        // Adam update
+        for (int i = 0; i < n_; ++i) {
+            m[i] = beta1_ * m[i] + (1.0 - beta1_) * g[i];
+            v[i] = beta2_ * v[i] + (1.0 - beta2_) * (g[i] * g[i]);
+        }
+
+        b1t *= beta1_;
+        b2t *= beta2_;
+
+        for (int i = 0; i < n_; ++i) {
+            double mhat = m[i] / (1.0 - b1t);
+            double vhat = v[i] / (1.0 - b2t);
+            x[i] -= alpha_ * mhat / (std::sqrt(vhat) + eps_);
+        }
+
+        if (iter == max_iters_) {
+            res.iters = iter;
+            res.final_f = f;
+            res.final_grad_norm = grad_norm;
         }
     }
 
-    auto end_time = std::chrono::high_resolution_clock::now(); // Finalizar medición de tiempo
-    std::chrono::duration<double> elapsed = end_time - start_time;
-    std::cout << "Tiempo de ejecución: " << elapsed.count() << " segundos\n";
-}
-
-// Método para imprimir la solución final
-void Adam::printSolution() {
-    std::cout << "Solución óptima x: ";
-    for (double val : x) std::cout << val << " ";
-    std::cout << std::endl;
+    auto t1 = std::chrono::high_resolution_clock::now();
+    res.total_time_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+    res.x = std::move(x);
+    return res;
 }
