@@ -1,38 +1,46 @@
 #include "Nesterov.h"
-#include "wine_quadratic.h"
-#include <iostream>
 
-static std::vector<std::vector<double>> to2D(int n, const std::vector<double>& Arow) {
-    std::vector<std::vector<double>> A(n, std::vector<double>(n));
-    for (int i = 0; i < n; ++i)
-        for (int j = 0; j < n; ++j)
-            A[i][j] = Arow[(size_t)i*n + j];
-    return A;
-}
+#include "wine_quadratic.h"
+#include <cblas.h>
+#include <algorithm>
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 
 int main() {
-    // Definir la matriz A (3x3) y el vector b (3)
-    //std::vector<std::vector<double>> A = {{4, 1, 2}, {1, 3, 1}, {2, 1, 5}};
-    //std::vector<double> b = {1, 2, 3};
+    try {
+        const double lambda = 1e-3;     // ridge pequeño para SPD
+        const bool normalize = true;    // MUY recomendado para GD
 
-    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
-    int n = ab.n;
-    auto A = to2D(n, ab.A);
-    auto b = ab.b;
+        auto ab = build_quadratic_from_csv("../data/wine.csv", lambda, normalize, 1, 1);
+        int n = ab.n;
+        auto A = ab.A;
+        auto b = ab.b;
 
-    double alpha = 0.01;  // Tasa de aprendizaje
-    double momentum = 0.9; // Parámetro de momentum
-    int max_iters = 10000; // Número máximo de iteraciones
-    double tolerance = 1e-6; // Criterio de convergencia
 
-    // Crear objeto Nesterov
-    Nesterov nesterov(A, b, alpha, momentum, max_iters, tolerance);
+        // NAG params
+        const double alpha = 0.01;
+        const double momentum = 0.9;
+        const int max_iters = 50000;
+        const double tol_grad = 1e-6;
 
-    // Ejecutar optimización
-    nesterov.optimize();
+        Nesterov opt(n, std::move(A), std::move(b), alpha, momentum, max_iters, tol_grad);
+        auto res = opt.optimize_to_csv("nesterov.csv");
 
-    // Imprimir la solución encontrada
-    nesterov.printSolution();
+        std::cout << "OK: nesterov.csv generado\n";
+        std::cout << "iters=" << res.iters
+                  << " final_f=" << res.final_f
+                  << " final_grad_norm=" << res.final_grad_norm
+                  << " time_ms=" << res.total_time_ms << "\n";
 
-    return 0;
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: " << e.what() << "\n";
+        return 1;
+    }
 }
