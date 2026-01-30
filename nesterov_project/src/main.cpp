@@ -16,7 +16,7 @@ int main() {
     //std::vector<std::vector<double>> A = {{4, 1, 2}, {1, 3, 1}, {2, 1, 5}};
     //std::vector<double> b = {1, 2, 3};
 
-    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
+    auto ab = build_quadratic_from_csv("../../data/wine.csv", 1e-3, true, 1, 1);
     int n = ab.n;
     auto A = to2D(n, ab.A);
     auto b = ab.b;
