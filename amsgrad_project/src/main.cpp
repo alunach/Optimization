@@ -5,7 +5,7 @@
 #include <vector>
 
 int main() {
-    auto ab = build_quadratic_from_csv("../../data/wine.csv", 1e-3, true, 1, 1);
+    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
 
     QuadraticFunction f(ab.n, ab.A, ab.b);
 

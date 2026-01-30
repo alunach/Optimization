@@ -35,7 +35,7 @@ int main() {
     //int n = 3;
     //auto A = A_from_3x3();
     //std::vector<double> b = {1,2,3};
-    auto ab = build_quadratic_from_csv("../../data/wine.csv", 1e-3, true, 1, 1);
+    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
     int n = ab.n;
     auto A = ab.A;
     auto b = ab.b;
