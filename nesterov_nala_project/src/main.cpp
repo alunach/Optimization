@@ -1,5 +1,6 @@
 #include "nala.hpp"
 #include "quadratic.hpp"
+#include "wine_quadratic.h"
 #include <iostream>
 #include <vector>
 #include <iostream>
@@ -15,7 +16,14 @@
     }
     return A;
 }*/
-
+static std::vector<std::vector<double>> to2D(int n, const std::vector<double>& Arow) {
+    std::vector<std::vector<double>> A(n, std::vector<double>(n));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            A[i][j] = Arow[(size_t)i*n + j];
+    return A;
+}
+/*
 static std::vector<double> A_from_3x3() {
     // Row-major 3x3:
     // [4 1 2
@@ -27,11 +35,17 @@ static std::vector<double> A_from_3x3() {
         2,1,5
     };
 }
+*/
 
 int main() {
-    int n = 3;
-    auto A = A_from_3x3();
-    std::vector<double> b = {1,2,3};
+    //int n = 3;
+    //auto A = A_from_3x3();
+    //std::vector<double> b = {1,2,3};
+    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
+    int n = ab.n;
+    auto A = to2D(n, ab.A);
+    auto b = ab.b;
+
 
     QuadraticFunction f(n, A, b);
 

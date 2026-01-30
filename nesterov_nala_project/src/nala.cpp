@@ -1,36 +1,4 @@
 #include "nala.hpp"
-#include "quadratic.hpp"
-#include "wine_quadratic.h"
-#include <iostream>
-#include <vector>
-
-int main() {
-    auto ab = build_quadratic_from_csv("../../data/wine.csv", /*lambda=*/1e-3, /*normalize=*/true,
-                                       /*y_mode=*/1, /*positive_class=*/1);
-
-    QuadraticFunction f(ab.n, ab.A, ab.b);
-
-    NALAConfig cfg;
-    cfg.outer_iters = 2000;
-    cfg.k_sync = 5;
-    cfg.lr_fast = 1e-3;
-    cfg.beta1 = 0.9;
-    cfg.beta2 = 0.999;
-    cfg.eps = 1e-8;
-    cfg.mu = -0.5;
-    cfg.alpha_slow = 1e-3;
-    cfg.tol_grad = 1e-6;
-
-    NALA nala(f, cfg);
-    nala.set_initial_phi(std::vector<double>(ab.n, 0.0));
-    nala.optimize("nala.csv");
-
-    std::cout << "NALA ok. dim=" << ab.n << "\n";
-    return 0;
-}
-
-/*
-#include "nala.hpp"
 
 #include <cmath>
 #include <chrono>
@@ -119,4 +87,3 @@ void NALA::optimize(const std::string& csv_path) {
     if (csv.is_open()) csv.close();
 }
 
-*/
