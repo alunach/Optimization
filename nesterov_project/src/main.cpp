@@ -30,7 +30,7 @@ int main() {
         const double tol_grad = 1e-6;
 
         Nesterov opt(n, std::move(A), std::move(b), alpha, momentum, max_iters, tol_grad);
-        auto res = opt.optimize_to_csv("nesterov.csv");
+        auto res = opt.optimize_to_csv("../data_output/nesterov.csv");
 
         std::cout << "OK: nesterov.csv generado\n";
         std::cout << "iters=" << res.iters

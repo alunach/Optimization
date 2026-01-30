@@ -26,7 +26,7 @@ int main() {
         const double tol_grad = 1e-6;
 
         GradientDescent gd(n, std::move(A), std::move(b), alpha, max_iters, tol_grad);
-        auto res = gd.optimize_to_csv("gradient.csv");
+        auto res = gd.optimize_to_csv("../data_output/gradient.csv");
 
         std::cout << "OK: gradient.csv generado\n";
         std::cout << "iters=" << res.iters

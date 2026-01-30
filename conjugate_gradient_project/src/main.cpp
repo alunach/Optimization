@@ -27,7 +27,7 @@ int main() {
 
     double rsold = cblas_ddot(n, r.data(), 1, r.data(), 1);
 
-    std::ofstream csv("cg.csv");
+    std::ofstream csv("../data_output/cg.csv");
     csv << "iter,f,grad_norm,time_ms\n";
 
     auto t0 = std::chrono::high_resolution_clock::now();

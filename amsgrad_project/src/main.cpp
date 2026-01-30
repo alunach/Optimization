@@ -16,7 +16,7 @@ int main() {
 
     AMSGrad opt(f, cfg);
     opt.set_initial_x(std::vector<double>(ab.n, 0.0));
-    opt.optimize("amsgrad.csv");
+    opt.optimize("../data_output/amsgrad.csv");
 
     std::cout << "AMSGrad ok. dim=" << ab.n << "\n";
     return 0;

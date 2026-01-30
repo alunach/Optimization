@@ -31,7 +31,7 @@ int main() {
         const double tol_grad = 1e-6;
 
         Adam opt(n, std::move(A), std::move(b), alpha, beta1, beta2, eps, max_iters, tol_grad);
-        auto res = opt.optimize_to_csv("adam.csv");
+        auto res = opt.optimize_to_csv("../data_output/adam.csv");
 
         std::cout << "OK: adam.csv generado\n";
         std::cout << "iters=" << res.iters

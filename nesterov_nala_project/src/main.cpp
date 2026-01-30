@@ -59,7 +59,7 @@ int main() {
 
     NALA nala(f, cfg);
     nala.set_initial_phi(std::vector<double>(n, 0.0));
-    nala.optimize("nala.csv");
+    nala.optimize("../data_output/nala.csv");
 
     const auto& sol = nala.solution();
     std::cout << "Solucion NALA: ";
