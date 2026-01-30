@@ -1,5 +1,30 @@
 #include "AMSGrad.hpp"
 #include "quadratic.hpp"
+#include "wine_quadratic.h"
+#include <iostream>
+#include <vector>
+
+int main() {
+    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
+
+    QuadraticFunction f(ab.n, ab.A, ab.b);
+
+    AMSGradConfig cfg;
+    cfg.alpha = 0.01;
+    cfg.max_iters = 20000;
+    cfg.tol_grad = 1e-6;
+
+    AMSGrad opt(f, cfg);
+    opt.set_initial_x(std::vector<double>(ab.n, 0.0));
+    opt.optimize("amsgrad.csv");
+
+    std::cout << "AMSGrad ok. dim=" << ab.n << "\n";
+    return 0;
+}
+
+/*
+#include "AMSGrad.hpp"
+#include "quadratic.hpp"
 #include <iostream>
 #include <vector>
 
@@ -30,3 +55,4 @@ int main() {
     std::cout << "\n";
     return 0;
 }
+*/

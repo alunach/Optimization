@@ -1,3 +1,70 @@
+#include "wine_quadratic.h"
+#include "quadratic.hpp"
+#include <cblas.h>
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+static void matvec(int n, const std::vector<double>& A, const std::vector<double>& x, std::vector<double>& Ax) {
+    Ax.assign(n, 0.0);
+    cblas_dgemv(CblasRowMajor, CblasNoTrans, n, n, 1.0,
+                A.data(), n, x.data(), 1, 0.0, Ax.data(), 1);
+}
+
+int main() {
+    auto ab = build_quadratic_from_csv("../data/wine.csv", 1e-3, true, 1, 1);
+    int n = ab.n;
+
+    QuadraticFunction f(n, ab.A, ab.b);
+
+    std::vector<double> x(n, 0.0), Ax, r(n), p(n), Ap;
+
+    matvec(n, ab.A, x, Ax);
+    for (int i = 0; i < n; ++i) r[i] = ab.b[i] - Ax[i];
+    p = r;
+
+    double rsold = cblas_ddot(n, r.data(), 1, r.data(), 1);
+
+    std::ofstream csv("cg.csv");
+    csv << "iter,f,grad_norm,time_ms\n";
+
+    auto t0 = std::chrono::high_resolution_clock::now();
+
+    for (int k = 1; k <= 5000; ++k) {
+        matvec(n, ab.A, p, Ap);
+        double denom = cblas_ddot(n, p.data(), 1, Ap.data(), 1);
+        if (std::abs(denom) < 1e-30) break;
+
+        double alpha = rsold / denom;
+
+        cblas_daxpy(n, alpha, p.data(), 1, x.data(), 1);
+        cblas_daxpy(n, -alpha, Ap.data(), 1, r.data(), 1);
+
+        double rsnew = cblas_ddot(n, r.data(), 1, r.data(), 1);
+        double rnorm = std::sqrt(rsnew);
+
+        double fx = f.value(x);
+        auto now = std::chrono::high_resolution_clock::now();
+        double ms = std::chrono::duration<double, std::milli>(now - t0).count();
+        csv << k << "," << fx << "," << rnorm << "," << ms << "\n";
+
+        if (rnorm < 1e-6) {
+            std::cout << "CG converged at iter " << k << "\n";
+            break;
+        }
+
+        double beta = rsnew / rsold;
+        for (int i = 0; i < n; ++i) p[i] = r[i] + beta * p[i];
+        rsold = rsnew;
+    }
+
+    std::cout << "CG ok. dim=" << n << "\n";
+    return 0;
+}
+
+/*
 #include "quadratic.hpp"
 #include <cblas.h>
 #include <chrono>
@@ -91,3 +158,4 @@ int main() {
     std::cout << "\n";
     return 0;
 }
+*/

@@ -72,6 +72,7 @@ target_link_libraries(svd_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACK
 add_executable(gradient_project 
     gradient_project/src/main.cpp 
     gradient_project/src/GradientDescent.cpp
+    common/src/wine_quadratic.cpp
 )
 
 target_link_libraries(gradient_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
@@ -96,6 +97,7 @@ target_link_libraries(sgd_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 add_executable(adam_project 
     adam_project/src/main.cpp 
     adam_project/src/Adam.cpp
+    common/src/wine_quadratic.cpp
 )
 
 target_link_libraries(adam_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
@@ -104,14 +106,16 @@ target_link_libraries(adam_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 add_executable(nesterov_project 
     nesterov_project/src/main.cpp 
     nesterov_project/src/Nesterov.cpp
+    common/src/wine_quadratic.cpp
 )
 
 target_link_libraries(nesterov_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 add_executable(nesterov_nala_project
-    nesterov_nala_project/src/main.cpp
-    nesterov_nala_project/src/nala.cpp
-    common/src/quadratic.cpp
+    nesterov_nala_project/src/main.cpp 
+    nesterov_nala_project/src/nala.cpp 
+    common/src/quadratic.cpp 
+    common/src/wine_quadratic.cpp
 )
 
 target_link_libraries(nesterov_nala_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
@@ -120,6 +124,7 @@ add_executable(amsgrad_project
   amsgrad_project/src/main.cpp
   amsgrad_project/src/AMSGrad.cpp
   common/src/quadratic.cpp
+  common/src/wine_quadratic.cpp
 )
 
 target_link_libraries(amsgrad_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
@@ -127,6 +132,7 @@ target_link_libraries(amsgrad_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 add_executable(conjugate_gradient_project
   conjugate_gradient_project/src/main.cpp
   common/src/quadratic.cpp
+  common/src/wine_quadratic.cpp
 )
 
 target_link_libraries(conjugate_gradient_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
