@@ -34,10 +34,10 @@ add_executable(knn_project
 # Enlace de bibliotecas para kNN
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
-#find_package(LAPACKE REQUIRED)
+find_library(LAPACKE_LIB lapacke REQUIRED)
 set(LAPACKE_LIB "/usr/lib/x86_64-linux-gnu/liblapacke.so")
 
-target_link_libraries(knn_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(knn_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 # Subproyecto: PCA
 add_executable(pca_project
@@ -49,7 +49,7 @@ add_executable(pca_project
 )
 
 # Enlace de bibliotecas para PCA
-target_link_libraries(pca_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(pca_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 # Subproyecto: AutoDiff
 add_executable(autodiff_project
@@ -58,7 +58,7 @@ add_executable(autodiff_project
 )
 
 # Enlace de bibliotecas para AutoDiff
-target_link_libraries(autodiff_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(autodiff_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 
 add_executable(svd_project 
@@ -75,7 +75,7 @@ add_executable(gradient_project
     common/src/wine_quadratic.cpp
 )
 
-target_link_libraries(gradient_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(gradient_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 
 add_executable(minibatch_sgd_project 
@@ -83,7 +83,7 @@ add_executable(minibatch_sgd_project
     minibatch_sgd_project/src/MiniBatchSGD.cpp
 )
 
-target_link_libraries(minibatch_sgd_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(minibatch_sgd_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 
 add_executable(sgd_project 
@@ -91,7 +91,7 @@ add_executable(sgd_project
     sgd_project/src/SGD.cpp
 )
 
-target_link_libraries(sgd_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(sgd_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 
 add_executable(adam_project 
@@ -100,7 +100,7 @@ add_executable(adam_project
     common/src/wine_quadratic.cpp
 )
 
-target_link_libraries(adam_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(adam_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 
 add_executable(nesterov_project 
@@ -109,7 +109,7 @@ add_executable(nesterov_project
     common/src/wine_quadratic.cpp
 )
 
-target_link_libraries(nesterov_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(nesterov_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 add_executable(nesterov_nala_project
     nesterov_nala_project/src/main.cpp 
@@ -118,7 +118,7 @@ add_executable(nesterov_nala_project
     common/src/wine_quadratic.cpp
 )
 
-target_link_libraries(nesterov_nala_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(nesterov_nala_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 add_executable(amsgrad_project
   amsgrad_project/src/main.cpp
@@ -127,7 +127,7 @@ add_executable(amsgrad_project
   common/src/wine_quadratic.cpp
 )
 
-target_link_libraries(amsgrad_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(amsgrad_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
 
 add_executable(conjugate_gradient_project
   conjugate_gradient_project/src/main.cpp
@@ -135,4 +135,4 @@ add_executable(conjugate_gradient_project
   common/src/wine_quadratic.cpp
 )
 
-target_link_libraries(conjugate_gradient_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(conjugate_gradient_project ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LAPACKE_LIB})
