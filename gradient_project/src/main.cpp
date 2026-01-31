@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         const QuadraticCase qc = parse_case(argc, argv);
 
         // Construimos (A0,b) desde wine.csv y MODIFICAMOS SOLO A según el caso solicitado
-        auto ab = build_quadratic_case_from_csv(
+        auto ab = build_quadratic_case_from_wine_csv(
             "../data/wine.csv",
             qc,
             lambda,

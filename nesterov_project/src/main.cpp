@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 
         const QuadraticCase qc = parse_case(argc, argv);
 
-        auto ab = build_quadratic_case_from_csv(
+        auto ab = build_quadratic_case_from_wine_csv(
             "../data/wine.csv",
             qc,
             lambda,
