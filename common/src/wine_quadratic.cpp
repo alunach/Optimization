@@ -1,4 +1,3 @@
-// common/src/wine_quadratic.cpp
 #include "wine_quadratic.h"
 #include <cblas.h>
 #include <fstream>
@@ -21,7 +20,6 @@ static std::vector<std::vector<double>> read_csv_numeric(const std::string& path
     std::vector<std::vector<double>> rows;
     std::string line;
 
-    // Lee todo como tokens, ignora encabezado si no es numérico
     bool header_checked = false;
 
     while (std::getline(in, line)) {
@@ -31,9 +29,10 @@ static std::vector<std::vector<double>> read_csv_numeric(const std::string& path
         std::stringstream ss(line);
         std::string tok;
         while (std::getline(ss, tok, ',')) {
-            // trim
-            tok.erase(tok.begin(), std::find_if(tok.begin(), tok.end(), [](unsigned char ch){ return !std::isspace(ch); }));
-            tok.erase(std::find_if(tok.rbegin(), tok.rend(), [](unsigned char ch){ return !std::isspace(ch); }).base(), tok.end());
+            tok.erase(tok.begin(), std::find_if(tok.begin(), tok.end(),
+                [](unsigned char ch){ return !std::isspace(ch); }));
+            tok.erase(std::find_if(tok.rbegin(), tok.rend(),
+                [](unsigned char ch){ return !std::isspace(ch); }).base(), tok.end());
             tokens.push_back(tok);
         }
         if (tokens.size() < 2) continue;
@@ -44,13 +43,12 @@ static std::vector<std::vector<double>> read_csv_numeric(const std::string& path
             for (auto& t : tokens) {
                 if (!is_number(t)) { all_numeric = false; break; }
             }
-            if (!all_numeric) continue; // salta header
+            if (!all_numeric) continue; // skip header
         }
 
         std::vector<double> r;
         r.reserve(tokens.size());
         for (auto& t : tokens) {
-            // si aparece algo no numérico a mitad (raro), se descarta la fila
             if (!is_number(t)) { r.clear(); break; }
             r.push_back(std::stod(t));
         }
@@ -72,31 +70,40 @@ QuadraticAB build_quadratic_from_csv(
 
     const int m = (int)rows.size();
     const int p = (int)rows[0].size();
-    if (p < 2) throw std::runtime_error("CSV debe tener >=2 columnas (features + y)");
+    if (p < 2) throw std::runtime_error("CSV debe tener >=2 columnas");
 
-    // Asumimos: últimas columna = label/y
-    const int d = p - 1;
-
-    // Construye X (m x d) y y (m)
-    std::vector<double> X((size_t)m * d, 0.0); // row-major
+    int d = 0;
+    std::vector<double> X;
     std::vector<double> y(m, 0.0);
 
-    for (int i = 0; i < m; ++i) {
-        if ((int)rows[i].size() != p) throw std::runtime_error("Filas con distinto número de columnas en CSV");
-        for (int j = 0; j < d; ++j) {
-            X[(size_t)i * d + j] = rows[i][j];
-        }
+    if (y_mode == 0) {
+        // Regresión: y = última columna, X = resto
+        d = p - 1;
+        X.assign((size_t)m * d, 0.0);
 
-        double label = rows[i][d];
-        if (y_mode == 0) {
-            y[i] = label; // regresión directa
-        } else {
-            // one-vs-rest binario (útil para Wine 3 clases)
+        for (int i = 0; i < m; ++i) {
+            if ((int)rows[i].size() != p) throw std::runtime_error("Filas con distinto número de columnas");
+            for (int j = 0; j < d; ++j) X[(size_t)i * d + j] = rows[i][j];
+            y[i] = rows[i][d];
+        }
+    } else {
+        // One-vs-rest Wine: label = primera columna, X = columnas 1..p-1
+        d = p - 1;
+        X.assign((size_t)m * d, 0.0);
+
+        for (int i = 0; i < m; ++i) {
+            if ((int)rows[i].size() != p) throw std::runtime_error("Filas con distinto número de columnas");
+
+            double label = rows[i][0];
             y[i] = ((int)std::lround(label) == positive_class) ? 1.0 : 0.0;
+
+            for (int j = 0; j < d; ++j) {
+                X[(size_t)i * d + j] = rows[i][j + 1];
+            }
         }
     }
 
-    // Normalización z-score para estabilidad (muy recomendada para GD/NAG)
+    // Normalización z-score
     if (normalize) {
         std::vector<double> mean(d, 0.0), var(d, 0.0);
 
@@ -121,7 +128,7 @@ QuadraticAB build_quadratic_from_csv(
         }
     }
 
-    // A = X^T X + lambda I   (d x d)
+    // A = X^T X + lambda I
     std::vector<double> A((size_t)d * d, 0.0);
     cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans,
                 d, d, m,
@@ -133,7 +140,7 @@ QuadraticAB build_quadratic_from_csv(
         for (int i = 0; i < d; ++i) A[(size_t)i * d + i] += lambda;
     }
 
-    // b = X^T y  (d)
+    // b = X^T y
     std::vector<double> b(d, 0.0);
     cblas_dgemv(CblasRowMajor, CblasTrans,
                 m, d,

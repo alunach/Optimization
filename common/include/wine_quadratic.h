@@ -1,4 +1,3 @@
-// common/include/wine_quadratic.h
 #pragma once
 #include <string>
 #include <vector>
@@ -9,12 +8,20 @@ struct QuadraticAB {
     std::vector<double> b;             // (n)
 };
 
-// Construye A = X^T X + lambda I, b = X^T y
-// - path: ruta al CSV (ej: "../data/wine.csv")
-// - lambda: regularización ridge (0.0 = sin ridge)
-// - normalize: estandariza features (z-score) para estabilidad de GD/NAG
-// - y_mode: 0 = usar última columna como y (regresión)
-//          1 = binario one-vs-rest: y=1 si label==positive_class, si no 0
+// Construye una cuadrática f(x)= 0.5 x^T A x - b^T x, donde:
+//
+// y_mode=0 (regresión):
+//   - y = última columna
+//   - X = todas las columnas excepto la última
+//
+// y_mode=1 (one-vs-rest para Wine):
+//   - label = primera columna (Wine: 1/2/3)
+//   - y = 1 si label == positive_class, si no 0
+//   - X = columnas 2..p (todas excepto la primera)
+//
+// Luego:
+//   A = X^T X + lambda I
+//   b = X^T y
 QuadraticAB build_quadratic_from_csv(
     const std::string& path,
     double lambda = 1e-3,
