@@ -17,6 +17,17 @@ Este entorno está diseñado para trabajos prácticos, análisis experimental y 
 
 ## 1. Requisitos Previos
 
+### WSL2
+
+Para instalar WSL2 en Windows 11, abre PowerShell o CMD como administrador y ejecuta wsl --install. 
+Esto habilita los componentes necesarios y descarga Ubuntu por defecto. Tras reiniciar el equipo, se configurará un usuario y contraseña de Linux. 
+
+```bash
+wsl --install
+```
+
+Reinicia tu ordenador cuando se te solicite.
+
 ### Sistemas Soportados
 
 * Windows 10/11
@@ -37,7 +48,8 @@ Este entorno está diseñado para trabajos prácticos, análisis experimental y 
 1. Descargar Docker Desktop:
    [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
 2. Instalar y reiniciar si es necesario
-3. Verificar instalación:
+3. Importante: En la ventana de configuración, asegúrate de que la casilla "Use the WSL 2 based engine" (Usar el motor basado en WSL 2) esté marcada
+4. Verificar instalación:
 
 ```bash
 docker --version
@@ -112,13 +124,13 @@ docker images
 ### Windows (PowerShell)
 
 ```powershell
-docker run --rm -it --name optimization -v ${PWD} optimization-env
+docker run --rm -it --name optimization-container -v ${PWD} optimization-env
 ```
 
 ### Linux / macOS
 
 ```bash
-docker run --rm -it --name optimization -v ${PWD} optimization-env
+docker run --rm -it --name optimization-container -v ${PWD} optimization-env
 ```
 
 Esto crea:
@@ -147,6 +159,10 @@ Optimization/
 ├── autodiff_project/
 ├── common/
 ├── gradient_project/
+├── conjugate_gradient_project/
+├── knn_project/
+├── data/
+├── data_output/
 ├── knn_project/
 ├── minibatch_sgd_project/
 ├── nesterov_project/
@@ -188,45 +204,7 @@ pkg-config --modversion lapacke
 
 ---
 
-## 8. Ajustes Recomendados en `CMakeLists.txt`
-
-Para habilitar **C++23** en todo el proyecto, edita el archivo raíz `CMakeLists.txt` y cambia:
-
-```cmake
-set(CMAKE_CXX_STANDARD 17)
-```
-
-por:
-
-```cmake
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-```
-
-### Verificación de NALA
-
-Asegúrate de que el target del proyecto NALA apunte a la carpeta correcta:
-
-```cmake
-add_executable(nesterov_nala_project
-    nesterov_nala_project/src/main.cpp
-    nesterov_nala_project/src/nala.cpp
-    nesterov_nala_project/src/quadratic.cpp
-)
-```
-
-Y que incluya:
-
-```cmake
-target_include_directories(nesterov_nala_project PRIVATE
-    nesterov_nala_project/include
-    common/include
-)
-```
-
----
-
-## 9. Compilación del Proyecto Completo
+## 8. Compilación del Proyecto Completo
 
 Desde la raíz del repositorio:
 
@@ -254,51 +232,95 @@ Los ejecutables se generarán dentro de `build/`, por ejemplo:
 
 ---
 
-## 10. Ejecución y Generación de Resultados (CSV)
+## 9. Ejecución y Generación de Resultados (CSV)
 
-Cada ejecutable genera un archivo CSV con el formato:
+Si estas en la carpeta raiz el repositorio dentro del contenedor ejecuta:
+```bash
+cd build
+```
+
+Ejecutar los los comandos:
+
+```bash
+./gradient_project 0
+./gradient_project 1
+./gradient_project 2
+./gradient_project 3
+./nesterov_project 0
+./nesterov_project 1
+./nesterov_project 2
+./nesterov_project 3
+./adam_project 0
+./adam_project 1
+./adam_project 2
+./adam_project 3
+./amsgrad_project 0
+./amsgrad_project 1
+./amsgrad_project 2
+./amsgrad_project 3
+./nesterov_nala_project 0
+./nesterov_nala_project 1
+./nesterov_nala_project 2
+./nesterov_nala_project 3
+./conjugate_gradient_project 0
+./conjugate_gradient_project 1
+./conjugate_gradient_project 2
+./conjugate_gradient_project 3
+```
+
+El parámetros corresponen a casos propuestos que modifican la matriz A:
+1. 0 = Convexo
+2. 1 = Fuertemente Convexo
+3. 2 = Mal acondicionada
+4. 3 = No Convexo
+
+Cada ejecutable genera archivos CSV con el formato:
 
 ```
 iter,f,grad_norm,time_ms
 ```
 
-Se recomienda mover los resultados a:
+Con la siguioente estructura en el repositorio:
 
 ```
-data/
-├── convexa/
-├── mal_condicionada/
-└── no_convexa/
-```
-
-Ejemplo:
-
-```bash
-mkdir -p data/mal_condicionada
-mv nala.csv data/mal_condicionada/
+data_ouput/
+├── adam_convex.csv/
+├── adam_illcond.csv/
+├── adam_nonconvex.csv/
+├── adam_strong.csv/
+├── .../
 ```
 
 ---
 
-## 11. Generación de Gráficos para el Paper SBC
+## 10. Generación de Gráficos para el Paper SBC
 
 Los archivos CSV pueden convertirse en gráficos de convergencia usando Python:
 
+1. Buscar la carpeta python en el repositorio y extraer el copiar el código del archivo main.py.
+2. Crear un documento nuevo en Google Colab.
+3. Subir los archivos CSV a la ruta /content/optimization/
+4. Por cada ejecución necesitarás modificar una línea del código similar a/con a,b,c y d:
 ```bash
-python3 plot_results.py data/mal_condicionada/*.csv
+a) paths = sorted(glob.glob(os.path.join(CSV_DIR, "**", "*_strong.csv"), recursive=True))
+b) paths = sorted(glob.glob(os.path.join(CSV_DIR, "**", "*_convex.csv"), recursive=True))
+c) paths = sorted(glob.glob(os.path.join(CSV_DIR, "**", "*_illcond.csv"), recursive=True))
+d) paths = sorted(glob.glob(os.path.join(CSV_DIR, "**", "*_nonconvex.csv"), recursive=True))
 ```
+5. Se generaran los archivos en la ruta /content
 
-Esto generará:
+Las 4 ejecuciones generarán:
 
-* `convergencia.png`
-* `grad_norm.png`
-* `tiempo_vs_iter.png`
+* `comparativo_optimization_illcond.png`
+* `comparativo_optimization_convex.png`
+* `comparativo_optimization_strong.png`
+* `comparativo_optimization_nonconvex.png`
 
 Estos archivos pueden ser insertados directamente en el informe LaTeX (SBC).
 
 ---
 
-## 12. Control del Contenedor
+## 11. Control del Contenedor
 
 ### Detener
 
@@ -321,7 +343,7 @@ docker rmi optimization-env
 
 ---
 
-## 13. Buenas Prácticas Académicas
+## 12. Buenas Prácticas Académicas
 
 * Mantener la lógica interna de los optimizadores sin modificar
 * Cambiar únicamente la matriz A o la función objetivo en `main.cpp`
@@ -331,7 +353,7 @@ docker rmi optimization-env
 
 ---
 
-## 14. Referencias Técnicas
+## 13. Referencias Técnicas
 
 * OpenBLAS — [https://www.openblas.net/](https://www.openblas.net/)
 * LAPACK — [https://www.netlib.org/lapack/](https://www.netlib.org/lapack/)
