@@ -291,6 +291,20 @@ data_ouput/
 ├── .../
 ```
 
+Para revisar ejecutar:
+
+```bash
+cd ..
+cd data_output
+ls
+```
+
+Para copiar los resultado de /data_output, abre un CMD y ejecuta:
+
+```bash
+docker cp optimization-container:/workspace/Optimization/data_output D:/
+```
+
 ---
 
 ## 10. Generación de Gráficos para el Paper SBC
@@ -315,6 +329,8 @@ Las 4 ejecuciones generarán:
 * `comparativo_optimization_convex.png`
 * `comparativo_optimization_strong.png`
 * `comparativo_optimization_nonconvex.png`
+
+Los archivos ya fueron generados en la carpeta /python/graficas del repositorio por usted:
 
 Estos archivos pueden ser insertados directamente en el informe LaTeX (SBC).
 
